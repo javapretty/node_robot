@@ -60,9 +60,8 @@ int Robot_Manager::init(void) {
 	robot_index_ = 0;
 
 	//加载robot_struct
-	STRUCT_MANAGER->init_struct("config/db_struct.xml", ROBOT_STRUCT);
-	STRUCT_MANAGER->init_struct("config/base_struct.xml", ROBOT_STRUCT);
-	STRUCT_MANAGER->init_struct("config/outer_struct.xml", ROBOT_STRUCT);
+	STRUCT_MANAGER->init_struct("config/client_msg.xml", ROBOT_STRUCT);
+	STRUCT_MANAGER->init_struct("config/public_struct.xml", ROBOT_STRUCT);
 
 	//连接center_server
 	Endpoint_Info endpoint_info;
