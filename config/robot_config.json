@@ -1,6 +1,6 @@
 {
    "center_ip" : "127.0.0.1",	//center_server ip
-   "center_port" : 8200,			//center_server port
+   "center_port" : 8000,			//center_server port
    "robot_count" : 1,					//登录的机器人总数
    "login_interval" : 200,			//登录间隔,单位是毫秒
    "send_msg_interval" : 2000,	//发送消息间隔,单位是毫秒
