@@ -54,7 +54,7 @@ int Robot::auto_send_msg() {
 		if (robot_struct) {
 			Byte_Buffer buffer;
 			make_buffer(buffer, msg_id);
-			robot_struct->write_buffer(buffer);
+			robot_struct->write_byte_buffer(buffer);
 			buffer.write_len(RPC_PKG);
 			ROBOT_MANAGER->send_to_gate(gate_cid_, buffer);
 		}
@@ -155,7 +155,7 @@ int Robot::recv_server_msg(int msg_id, Byte_Buffer &buf) {
 	stream << msg_id;
 	Robot_Struct *robot_struct = STRUCT_MANAGER->get_robot_struct(stream.str());
 	if (robot_struct) {
-		robot_struct->read_buffer(buf);
+		robot_struct->read_byte_buffer(buf);
 	}
 	return 0;
 }
