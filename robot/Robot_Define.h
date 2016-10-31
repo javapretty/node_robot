@@ -8,12 +8,12 @@
 #ifndef ROBOT_DEFINE_H_
 #define ROBOT_DEFINE_H_
 
-#include "boost/unordered_map.hpp"
+#include <unordered_map>
 #include <vector>
 #include "Time_Value.h"
 #include "Byte_Buffer.h"
 
-typedef boost::unordered_map<int32_t, Time_Value> Msg_Cost_Time_Map;
+typedef std::unordered_map<int32_t, Time_Value> Msg_Cost_Time_Map;
 
 enum Message {
 	REQ_HEARTBEAT 			=	1,	//发送心跳到gate_server

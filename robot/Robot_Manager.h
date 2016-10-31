@@ -19,7 +19,7 @@ class Robot_Manager: public Thread {
 	typedef Object_Pool<Connector, Thread_Mutex> Connector_Pool;
 	typedef Object_Pool<Robot> Robot_Pool;
 	typedef List<int, Thread_Mutex> Tick_List;
-	typedef boost::unordered_map<int, Robot *> Cid_Robot_Map;
+	typedef std::unordered_map<int, Robot *> Cid_Robot_Map;
 public:
 	static Robot_Manager *instance(void);
 	static void destroy(void);
