@@ -33,13 +33,13 @@ public:
 	int req_create_role(void);
 
 	//server-->client
-	int recv_server_msg(int msg_id, Block_Buffer &buf);
-	int res_select_gate(Block_Buffer &buf);
-	int res_connect_gate(Block_Buffer &buf);
-	int res_role_info(Block_Buffer &buf);
-	int res_error_code(int msg_id, Block_Buffer &buf);
+	int recv_server_msg(int msg_id, Byte_Buffer &buf);
+	int res_select_gate(Byte_Buffer &buf);
+	int res_connect_gate(Byte_Buffer &buf);
+	int res_role_info(Byte_Buffer &buf);
+	int res_error_code(int msg_id, Byte_Buffer &buf);
 
-	void make_buffer(Block_Buffer &buf, int msg_id);
+	void make_buffer(Byte_Buffer &buf, int msg_id);
 
 	inline int32_t get_cost_time_total() { return cost_time_total_; }
 	inline int32_t get_msg_count() { return msg_count_; }

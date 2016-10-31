@@ -11,7 +11,7 @@
 #include "boost/unordered_map.hpp"
 #include <vector>
 #include "Time_Value.h"
-#include "Block_Buffer.h"
+#include "Byte_Buffer.h"
 
 typedef boost::unordered_map<int32_t, Time_Value> Msg_Cost_Time_Map;
 
@@ -66,7 +66,7 @@ struct Robot_Info {
 		career = 0;
 	}
 
-	int deserialize(Block_Buffer &buffer) {
+	int deserialize(Byte_Buffer &buffer) {
 		buffer.read_int64(role_id);
 		buffer.read_string(role_name);
 		buffer.read_string(account);

@@ -80,17 +80,17 @@ int Robot_Manager::init(void) {
 }
 
 int Robot_Manager::process_list(void) {
-	Block_Buffer *buffer = 0;
+	Byte_Buffer *buffer = 0;
 
 	while (1) {
 		bool all_empty = true;
-		if (center_connector_ && (buffer = center_connector_->block_list().pop_front()) != 0) {
+		if (center_connector_ && (buffer = center_connector_->buffer_list().pop_front()) != 0) {
 			all_empty = false;
-			process_block(*buffer);
+			process_buffer(*buffer);
 		}
-		if (gate_connector_ && (buffer = gate_connector_->block_list().pop_front()) != 0) {
+		if (gate_connector_ && (buffer = gate_connector_->buffer_list().pop_front()) != 0) {
 			all_empty = false;
-			process_block(*buffer);
+			process_buffer(*buffer);
 		}
 		if (!tick_list_.empty()) {
 			all_empty = false;
@@ -105,38 +105,38 @@ int Robot_Manager::process_list(void) {
 	return 0;
 }
 
-int Robot_Manager::process_block(Block_Buffer &buf) {
+int Robot_Manager::process_buffer(Byte_Buffer &buffer) {
 	int endpoint_id = 0;
 	int32_t cid = 0;
 	uint8_t compress = 0;
 	uint8_t client_msg = 0;
 	uint8_t msg_id = 0;
-	buf.read_int32(endpoint_id);
-	buf.read_int32(cid);
-	buf.read_uint8(compress);
-	buf.read_uint8(client_msg);
-	buf.read_uint8(msg_id);
+	buffer.read_int32(endpoint_id);
+	buffer.read_int32(cid);
+	buffer.read_uint8(compress);
+	buffer.read_uint8(client_msg);
+	buffer.read_uint8(msg_id);
 
 	Robot *robot = get_robot(cid);
 	switch (msg_id) {
 	case RES_SELECT_GATE:{
-		robot->res_select_gate(buf);
+		robot->res_select_gate(buffer);
 		break;
 	}
 	case RES_CONNECT_GATE: {
-		robot->res_connect_gate(buf);
+		robot->res_connect_gate(buffer);
 		break;
 	}
 	case RES_FETCH_ROLE: {
-		robot->res_role_info(buf);
+		robot->res_role_info(buffer);
 		break;
 	}
 	case RES_ERROR_CODE:{
-		robot->res_error_code(msg_id, buf);
+		robot->res_error_code(msg_id, buffer);
 		break;
 	}
 	default: {
-		robot->recv_server_msg(msg_id, buf);
+		robot->recv_server_msg(msg_id, buffer);
 		break;
 	}
 	}
@@ -251,20 +251,20 @@ int Robot_Manager::connect_gate(int center_cid, std::string& gate_ip, int gate_p
 	return 0;
 }
 
-int Robot_Manager::send_to_center(int cid, Block_Buffer &buf)  {
+int Robot_Manager::send_to_center(int cid, Byte_Buffer &buffer)  {
 	if (cid < 2) {
 		LOG_ERROR("cid = %d", cid);
 		return -1;
 	}
-	return center_connector_->send_block(cid, buf);
+	return center_connector_->send_buffer(cid, buffer);
 }
 
-int Robot_Manager::send_to_gate(int cid, Block_Buffer &buf)  {
+int Robot_Manager::send_to_gate(int cid, Byte_Buffer &buffer)  {
 	if (cid < 2) {
 		LOG_ERROR("cid = %d", cid);
 		return -1;
 	}
-	return gate_connector_->send_block(cid, buf);
+	return gate_connector_->send_buffer(cid, buffer);
 }
 
 Robot* Robot_Manager::get_robot(int cid) {

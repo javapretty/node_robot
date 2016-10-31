@@ -52,7 +52,7 @@ int Robot::auto_send_msg() {
 		stream << "c2s_" << msg_id;
 		Robot_Struct *robot_struct = STRUCT_MANAGER->get_robot_struct(stream.str());
 		if (robot_struct) {
-			Block_Buffer buffer;
+			Byte_Buffer buffer;
 			make_buffer(buffer, msg_id);
 			robot_struct->write_buffer(buffer);
 			buffer.write_len(RPC_PKG);
@@ -65,7 +65,7 @@ int Robot::auto_send_msg() {
 int Robot::manual_send_msg(Args_Info &args) {
 	int msg_id = args.msg_id;
 	set_msg_time(msg_id);
-	Block_Buffer buf;
+	Byte_Buffer buf;
 	make_buffer(buf, msg_id);
 	for (std::vector<int>::iterator iter = args.args_list.begin(); iter != args.args_list.end(); ++iter) {
 		switch(*iter)
@@ -101,7 +101,7 @@ int Robot::manual_send_msg(Args_Info &args) {
 }
 
 int Robot::req_heartbeat(Time_Value &now) {
-	Block_Buffer buf;
+	Byte_Buffer buf;
 	make_buffer(buf, REQ_HEARTBEAT);
 	buf.write_int32(now.sec());
 	buf.write_len(RPC_PKG);
@@ -110,7 +110,7 @@ int Robot::req_heartbeat(Time_Value &now) {
 }
 
 int Robot::req_select_gate() {
-	Block_Buffer buf;
+	Byte_Buffer buf;
 	make_buffer(buf, REQ_SELECT_GATE);
 	buf.write_string(robot_info_.account);
 	buf.write_len(RPC_PKG);
@@ -119,7 +119,7 @@ int Robot::req_select_gate() {
 }
 
 int Robot::req_connect_gate(std::string& account, std::string& token) {
-	Block_Buffer buf;
+	Byte_Buffer buf;
 	make_buffer(buf, REQ_CONNECT_GATE);
 	buf.write_string(account);
 	buf.write_string(token);
@@ -129,7 +129,7 @@ int Robot::req_connect_gate(std::string& account, std::string& token) {
 }
 
 int Robot::req_fetch_role(void) {
-	Block_Buffer buf;
+	Byte_Buffer buf;
 	make_buffer(buf, REQ_FETCH_ROLE);
 	buf.write_string(robot_info_.account);
 	buf.write_len(RPC_PKG);
@@ -138,7 +138,7 @@ int Robot::req_fetch_role(void) {
 }
 
 int Robot::req_create_role(void) {
-	Block_Buffer buf;
+	Byte_Buffer buf;
 	make_buffer(buf, REQ_CREATE_ROLE);
 	buf.write_string(robot_info_.account);
 	buf.write_string(robot_info_.role_name);
@@ -149,7 +149,7 @@ int Robot::req_create_role(void) {
 	return 0;
 }
 
-int Robot::recv_server_msg(int msg_id, Block_Buffer &buf) {
+int Robot::recv_server_msg(int msg_id, Byte_Buffer &buf) {
 	std::stringstream stream;
 	stream << "s2c_";
 	stream << msg_id;
@@ -160,7 +160,7 @@ int Robot::recv_server_msg(int msg_id, Block_Buffer &buf) {
 	return 0;
 }
 
-int Robot::res_select_gate(Block_Buffer &buf) {
+int Robot::res_select_gate(Byte_Buffer &buf) {
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
 	std::string gate_ip = "";
 	int16_t gate_port = 0;
@@ -175,7 +175,7 @@ int Robot::res_select_gate(Block_Buffer &buf) {
 	return 0;
 }
 
-int Robot::res_connect_gate(Block_Buffer &buf) {
+int Robot::res_connect_gate(Byte_Buffer &buf) {
 	std::string account;
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
 	LOG_INFO("connect gate success, gate_cid = %d, account = %s, login_msec = %d", gate_cid_, robot_info_.account.c_str(), login_msec);
@@ -184,7 +184,7 @@ int Robot::res_connect_gate(Block_Buffer &buf) {
 	return 0;
 }
 
-int Robot::res_role_info(Block_Buffer &buf) {
+int Robot::res_role_info(Byte_Buffer &buf) {
 	robot_info_.deserialize(buf);
 	Time_Value now = Time_Value::gettimeofday();
 	int login_msec = now.msec() - login_tick_.msec();
@@ -197,7 +197,7 @@ int Robot::res_role_info(Block_Buffer &buf) {
 	return 0;
 }
 
-int Robot::res_error_code(int msg_id, Block_Buffer &buf) {
+int Robot::res_error_code(int msg_id, Byte_Buffer &buf) {
 	int16_t error_code = 0;
 	buf.read_int16(error_code);
 	LOG_ERROR("res_error_code, msg_id:%d, error_code:%d", msg_id, error_code);
@@ -208,7 +208,7 @@ int Robot::res_error_code(int msg_id, Block_Buffer &buf) {
 	return 0;
 }
 
-void Robot::make_buffer(Block_Buffer &buf, int msg_id) {
+void Robot::make_buffer(Byte_Buffer &buf, int msg_id) {
 	buf.write_uint16(0);
 	buf.write_uint8(msg_id);
 }

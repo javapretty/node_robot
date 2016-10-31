@@ -10,7 +10,7 @@
 
 #include "Thread.h"
 #include "List.h"
-#include "Block_List.h"
+#include "Buffer_List.h"
 #include "Object_Pool.h"
 #include "Endpoint.h"
 #include "Robot.h"
@@ -28,7 +28,7 @@ public:
 	int init(void);
 
 	int process_list();
-	int process_block(Block_Buffer &buf);
+	int process_buffer(Byte_Buffer &buffer);
 	int push_tick(int tick_v);
 
 	int tick(void);
@@ -38,8 +38,8 @@ public:
 	Robot *connect_center(const char *account = nullptr);
 	int connect_gate(int center_cid, std::string& gate_ip, int gate_port, std::string& token, std::string& account);
 
-	int send_to_center(int cid, Block_Buffer &buf);
-	int send_to_gate(int cid, Block_Buffer &buf);
+	int send_to_center(int cid, Byte_Buffer &buffer);
+	int send_to_gate(int cid, Byte_Buffer &buffer);
 
 	Robot* get_robot(int cid);
 
