@@ -118,25 +118,27 @@ int Robot_Manager::process_buffer(Byte_Buffer &buffer) {
 	buffer.read_uint8(msg_id);
 
 	Robot *robot = get_robot(cid);
+	Bit_Buffer buf;
+	buf.set_ary(buffer.get_read_ptr(), buffer.readable_bytes());
 	switch (msg_id) {
 	case RES_SELECT_GATE:{
-		robot->res_select_gate(buffer);
+		robot->res_select_gate(buf);
 		break;
 	}
 	case RES_CONNECT_GATE: {
-		robot->res_connect_gate(buffer);
+		robot->res_connect_gate(buf);
 		break;
 	}
 	case RES_FETCH_ROLE: {
-		robot->res_role_info(buffer);
+		robot->res_role_info(buf);
 		break;
 	}
 	case RES_ERROR_CODE:{
-		robot->res_error_code(msg_id, buffer);
+		robot->res_error_code(msg_id, buf);
 		break;
 	}
 	default: {
-		robot->recv_server_msg(msg_id, buffer);
+		robot->recv_server_msg(msg_id, buf);
 		break;
 	}
 	}
@@ -219,7 +221,7 @@ Robot *Robot_Manager::connect_center(const char *account) {
 	return robot;
 }
 
-int Robot_Manager::connect_gate(int center_cid, std::string& gate_ip, int gate_port, std::string& session, std::string& account) {
+int Robot_Manager::connect_gate(int center_cid, const char* gate_ip, int gate_port, std::string& token, std::string& account) {
 	//连接gate_server
 	Endpoint_Info endpoint_info;
 	endpoint_info.endpoint_type = CONNECTOR;
@@ -231,7 +233,7 @@ int Robot_Manager::connect_gate(int center_cid, std::string& gate_ip, int gate_p
 	gate_connector_ = connector_pool_.pop();
 	gate_connector_->init(endpoint_info);
 	gate_connector_->start();
-	int gate_cid = gate_connector_->connect_server(gate_ip.c_str(), gate_port);
+	int gate_cid = gate_connector_->connect_server(gate_ip, gate_port);
 	if (gate_cid < 2) {
 		LOG_ERROR("gate_cid = %d", gate_cid);
 		return -1;
@@ -247,24 +249,36 @@ int Robot_Manager::connect_gate(int center_cid, std::string& gate_ip, int gate_p
 	Robot *robot = robot_iter->second;
 	robot->set_gate_cid(gate_cid);
 	robot->robot_info().account = account;
-	robot->req_connect_gate(account, session);
+	robot->req_connect_gate(account, token);
 	return 0;
 }
 
-int Robot_Manager::send_to_center(int cid, Byte_Buffer &buffer)  {
+int Robot_Manager::send_to_center(int cid, int msg_id, Bit_Buffer &buffer)  {
 	if (cid < 2) {
 		LOG_ERROR("cid = %d", cid);
 		return -1;
 	}
-	return center_connector_->send_buffer(cid, buffer);
+
+	Byte_Buffer buf;
+	buf.write_uint16(0);
+	buf.write_uint8(msg_id);
+	buf.copy(buffer.data(), buffer.get_byte_size());
+	buf.write_len(RPC_PKG);
+	return center_connector_->send_buffer(cid, buf);
 }
 
-int Robot_Manager::send_to_gate(int cid, Byte_Buffer &buffer)  {
+int Robot_Manager::send_to_gate(int cid, int msg_id, Bit_Buffer &buffer)  {
 	if (cid < 2) {
 		LOG_ERROR("cid = %d", cid);
 		return -1;
 	}
-	return gate_connector_->send_buffer(cid, buffer);
+
+	Byte_Buffer buf;
+	buf.write_uint16(0);
+	buf.write_uint8(msg_id);
+	buf.copy(buffer.data(), buffer.get_byte_size());
+	buf.write_len(RPC_PKG);
+	return gate_connector_->send_buffer(cid, buf);
 }
 
 Robot* Robot_Manager::get_robot(int cid) {

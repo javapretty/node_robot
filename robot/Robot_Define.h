@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include <vector>
 #include "Time_Value.h"
-#include "Byte_Buffer.h"
 
 typedef std::unordered_map<int32_t, Time_Value> Msg_Cost_Time_Map;
 
@@ -64,17 +63,6 @@ struct Robot_Info {
 		exp = 0;
 		gender = 0;
 		career = 0;
-	}
-
-	int deserialize(Byte_Buffer &buffer) {
-		buffer.read_int64(role_id);
-		buffer.read_string(role_name);
-		buffer.read_string(account);
-		buffer.read_int8(level);
-		buffer.read_int32(exp);
-		buffer.read_int8(gender);
-		buffer.read_int8(career);
-		return 0;
 	}
 };
 

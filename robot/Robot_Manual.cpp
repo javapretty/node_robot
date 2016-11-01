@@ -39,8 +39,8 @@ int Robot_Manual::init() {
 
 void Robot_Manual::run(){
 	sleep(2);
-	while(get_cmd() != 0){
-		robot_->manual_send_msg(args_);
+	while(get_cmd() != 0) {
+		//robot_->manual_send_msg(args_);
 	}
 }
 

@@ -10,6 +10,7 @@
 
 #include "Thread.h"
 #include "List.h"
+#include "Bit_Buffer.h"
 #include "Buffer_List.h"
 #include "Object_Pool.h"
 #include "Endpoint.h"
@@ -36,10 +37,10 @@ public:
 	int robot_tick(Time_Value &now);
 
 	Robot *connect_center(const char *account = nullptr);
-	int connect_gate(int center_cid, std::string& gate_ip, int gate_port, std::string& token, std::string& account);
+	int connect_gate(int center_cid, const char* gate_ip, int gate_port, std::string& token, std::string& account);
 
-	int send_to_center(int cid, Byte_Buffer &buffer);
-	int send_to_gate(int cid, Byte_Buffer &buffer);
+	int send_to_center(int cid, int msg_id, Bit_Buffer &buffer);
+	int send_to_gate(int cid, int msg_id, Bit_Buffer &buffer);
 
 	Robot* get_robot(int cid);
 

@@ -52,130 +52,80 @@ int Robot::auto_send_msg() {
 		stream << "c2s_" << msg_id;
 		Robot_Struct *robot_struct = STRUCT_MANAGER->get_robot_struct(stream.str());
 		if (robot_struct) {
-			Byte_Buffer buffer;
-			make_buffer(buffer, msg_id);
-			robot_struct->write_byte_buffer(buffer);
-			buffer.write_len(RPC_PKG);
-			ROBOT_MANAGER->send_to_gate(gate_cid_, buffer);
+			Bit_Buffer buffer;
+			robot_struct->write_bit_buffer(buffer);
+			ROBOT_MANAGER->send_to_gate(gate_cid_, msg_id, buffer);
 		}
 	}
-	return 0;
-}
-
-int Robot::manual_send_msg(Args_Info &args) {
-	int msg_id = args.msg_id;
-	set_msg_time(msg_id);
-	Byte_Buffer buf;
-	make_buffer(buf, msg_id);
-	for (std::vector<int>::iterator iter = args.args_list.begin(); iter != args.args_list.end(); ++iter) {
-		switch(*iter)
-		{
-		case 1:
-			buf.write_int8(args.int8_args[args.cursor[0]++]);
-			break;
-		case 2:
-			buf.write_int16(args.int16_args[args.cursor[1]++]);
-			break;
-		case 3:
-			buf.write_int32(args.int32_args[args.cursor[2]++]);
-			break;
-		case 4:
-			buf.write_int64(args.int64_args[args.cursor[3]++]);
-			break;
-		case 5:
-			buf.write_bool(args.bool_args[args.cursor[4]++]);
-			break;
-		case 6:
-			buf.write_double(args.double_args[args.cursor[5]++]);
-			break;
-		case 7:
-			buf.write_string(args.string_args[args.cursor[6]++]);
-			break;
-		default:
-			break;
-		}
-	}
-	buf.write_len(RPC_PKG);
-	ROBOT_MANAGER->send_to_gate(gate_cid_, buf);
 	return 0;
 }
 
 int Robot::req_heartbeat(Time_Value &now) {
-	Byte_Buffer buf;
-	make_buffer(buf, REQ_HEARTBEAT);
-	buf.write_int32(now.sec());
-	buf.write_len(RPC_PKG);
-	ROBOT_MANAGER->send_to_gate(gate_cid_, buf);
+	Bit_Buffer buffer;
+	buffer.write_int(now.sec(), 32);
+	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_HEARTBEAT, buffer);
 	return 0;
 }
 
 int Robot::req_select_gate() {
-	Byte_Buffer buf;
-	make_buffer(buf, REQ_SELECT_GATE);
-	buf.write_string(robot_info_.account);
-	buf.write_len(RPC_PKG);
-	ROBOT_MANAGER->send_to_center(center_cid_, buf);
+	Bit_Buffer buffer;
+	buffer.write_str(robot_info_.account.c_str());
+	ROBOT_MANAGER->send_to_center(center_cid_, REQ_SELECT_GATE, buffer);
 	return 0;
 }
 
 int Robot::req_connect_gate(std::string& account, std::string& token) {
-	Byte_Buffer buf;
-	make_buffer(buf, REQ_CONNECT_GATE);
-	buf.write_string(account);
-	buf.write_string(token);
-	buf.write_len(RPC_PKG);
-	ROBOT_MANAGER->send_to_gate(gate_cid_, buf);
+	Bit_Buffer buffer;
+	buffer.write_str(account.c_str());
+	buffer.write_str(token.c_str());
+	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_CONNECT_GATE, buffer);
 	return 0;
 }
 
 int Robot::req_fetch_role(void) {
-	Byte_Buffer buf;
-	make_buffer(buf, REQ_FETCH_ROLE);
-	buf.write_string(robot_info_.account);
-	buf.write_len(RPC_PKG);
-	ROBOT_MANAGER->send_to_gate(gate_cid_, buf);
+	Bit_Buffer buffer;
+	buffer.write_str(robot_info_.account.c_str());
+	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_FETCH_ROLE, buffer);
 	return 0;
 }
 
 int Robot::req_create_role(void) {
-	Byte_Buffer buf;
-	make_buffer(buf, REQ_CREATE_ROLE);
-	buf.write_string(robot_info_.account);
-	buf.write_string(robot_info_.role_name);
-	buf.write_int8(rand() % 2);
-	buf.write_int8(rand() % 3);
-	buf.write_len(RPC_PKG);
-	ROBOT_MANAGER->send_to_gate(gate_cid_, buf);
+	Bit_Buffer buffer;
+	buffer.write_str(robot_info_.account.c_str());
+	buffer.write_str(robot_info_.role_name.c_str());
+	buffer.write_uint(rand() % 2, 1);
+	buffer.write_uint(rand() % 3, 2);
+	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_CREATE_ROLE, buffer);
 	return 0;
 }
 
-int Robot::recv_server_msg(int msg_id, Byte_Buffer &buf) {
+int Robot::recv_server_msg(int msg_id, Bit_Buffer &buffer) {
 	std::stringstream stream;
 	stream << "s2c_";
 	stream << msg_id;
 	Robot_Struct *robot_struct = STRUCT_MANAGER->get_robot_struct(stream.str());
 	if (robot_struct) {
-		robot_struct->read_byte_buffer(buf);
+		robot_struct->read_bit_buffer(buffer);
 	}
 	return 0;
 }
 
-int Robot::res_select_gate(Byte_Buffer &buf) {
+int Robot::res_select_gate(Bit_Buffer &buffer) {
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
-	std::string gate_ip = "";
-	int16_t gate_port = 0;
-	std::string token = "";
-	buf.read_string(gate_ip);
-	buf.read_int16(gate_port);
-	buf.read_string(token);
+	char gate_ip[4096] = {0};
+	char token[4096] = {0};
+	buffer.read_str(gate_ip, 4096);
+	uint16_t gate_port = buffer.read_uint(16);
+	buffer.read_str(token, 4096);
+	std::string token_str(token);
 	LOG_INFO("select gate success, gate_ip:%s, gate_port:%d, token:%s, account:%s, login_msec:%d",
-			gate_ip.c_str(), gate_port, token.c_str(), robot_info_.account.c_str(), login_msec);
-	ROBOT_MANAGER->connect_gate(center_cid_, gate_ip, gate_port, token, robot_info_.account) ;
+			gate_ip, gate_port, token, robot_info_.account.c_str(), login_msec);
+	ROBOT_MANAGER->connect_gate(center_cid_, gate_ip, gate_port, token_str, robot_info_.account) ;
 
 	return 0;
 }
 
-int Robot::res_connect_gate(Byte_Buffer &buf) {
+int Robot::res_connect_gate(Bit_Buffer &buffer) {
 	std::string account;
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
 	LOG_INFO("connect gate success, gate_cid = %d, account = %s, login_msec = %d", gate_cid_, robot_info_.account.c_str(), login_msec);
@@ -184,8 +134,23 @@ int Robot::res_connect_gate(Byte_Buffer &buf) {
 	return 0;
 }
 
-int Robot::res_role_info(Byte_Buffer &buf) {
-	robot_info_.deserialize(buf);
+int Robot::res_role_info(Bit_Buffer &buffer) {
+	robot_info_.role_id = buffer.read_int(64);
+	char role_name[4096] = {0};
+	char account[4096] = {0};
+	buffer.read_str(role_name, 4096);
+	buffer.read_str(account, 4096);
+	std::stringstream stream;
+	stream << role_name;
+	robot_info_.role_name = stream.str();
+	stream.str("");
+	stream << account;
+	robot_info_.account = stream.str();
+	robot_info_.level = buffer.read_uint(8);
+	robot_info_.exp = buffer.read_uint(32);
+	robot_info_.gender = buffer.read_uint(1);
+	robot_info_.career = buffer.read_uint(2);
+
 	Time_Value now = Time_Value::gettimeofday();
 	int login_msec = now.msec() - login_tick_.msec();
 	Date_Time date(now);
@@ -197,18 +162,12 @@ int Robot::res_role_info(Byte_Buffer &buf) {
 	return 0;
 }
 
-int Robot::res_error_code(int msg_id, Byte_Buffer &buf) {
-	int16_t error_code = 0;
-	buf.read_int16(error_code);
+int Robot::res_error_code(int msg_id, Bit_Buffer &buffer) {
+	uint16_t error_code = buffer.read_uint(16);
 	LOG_ERROR("res_error_code, msg_id:%d, error_code:%d", msg_id, error_code);
 	if (error_code == 1) {
 		robot_info_.role_name = robot_info_.account;
 		req_create_role();
 	}
 	return 0;
-}
-
-void Robot::make_buffer(Byte_Buffer &buf, int msg_id) {
-	buf.write_uint16(0);
-	buf.write_uint8(msg_id);
 }

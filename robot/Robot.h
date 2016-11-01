@@ -10,6 +10,7 @@
 
 #include "Event_Handler.h"
 #include "Robot_Define.h"
+#include "Bit_Buffer.h"
 
 class Robot : public Event_Handler {
 public:
@@ -25,7 +26,6 @@ public:
 
 	//client-->server
 	int auto_send_msg();
-	int manual_send_msg(Args_Info &args);
 	int req_heartbeat(Time_Value &now);
 	int req_select_gate();
 	int req_connect_gate(std::string& account, std::string& token);
@@ -33,13 +33,11 @@ public:
 	int req_create_role(void);
 
 	//server-->client
-	int recv_server_msg(int msg_id, Byte_Buffer &buf);
-	int res_select_gate(Byte_Buffer &buf);
-	int res_connect_gate(Byte_Buffer &buf);
-	int res_role_info(Byte_Buffer &buf);
-	int res_error_code(int msg_id, Byte_Buffer &buf);
-
-	void make_buffer(Byte_Buffer &buf, int msg_id);
+	int recv_server_msg(int msg_id, Bit_Buffer &buffer);
+	int res_select_gate(Bit_Buffer &buffer);
+	int res_connect_gate(Bit_Buffer &buffer);
+	int res_role_info(Bit_Buffer &buffer);
+	int res_error_code(int msg_id, Bit_Buffer &buffer);
 
 	inline int32_t get_cost_time_total() { return cost_time_total_; }
 	inline int32_t get_msg_count() { return msg_count_; }
