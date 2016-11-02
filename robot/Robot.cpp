@@ -112,15 +112,16 @@ int Robot::recv_server_msg(int msg_id, Bit_Buffer &buffer) {
 
 int Robot::res_select_gate(Bit_Buffer &buffer) {
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
-	char gate_ip[4096] = {0};
-	char token[4096] = {0};
-	buffer.read_str(gate_ip, 4096);
-	uint16_t gate_port = buffer.read_uint(16);
-	buffer.read_str(token, 4096);
-	std::string token_str(token);
+	std::string gate_ip = "";
+	uint16_t gate_port = 0;
+	std::string token = "";
+
+	buffer.read_str(gate_ip);
+	gate_port = buffer.read_uint(16);
+	buffer.read_str(token);
 	LOG_INFO("select gate success, gate_ip:%s, gate_port:%d, token:%s, account:%s, login_msec:%d",
-			gate_ip, gate_port, token, robot_info_.account.c_str(), login_msec);
-	ROBOT_MANAGER->connect_gate(center_cid_, gate_ip, gate_port, token_str, robot_info_.account) ;
+			gate_ip.c_str(), gate_port, token.c_str(), robot_info_.account.c_str(), login_msec);
+	ROBOT_MANAGER->connect_gate(center_cid_, gate_ip.c_str(), gate_port, token, robot_info_.account) ;
 
 	return 0;
 }
@@ -136,16 +137,8 @@ int Robot::res_connect_gate(Bit_Buffer &buffer) {
 
 int Robot::res_role_info(Bit_Buffer &buffer) {
 	robot_info_.role_id = buffer.read_int(64);
-	char role_name[4096] = {0};
-	char account[4096] = {0};
-	buffer.read_str(role_name, 4096);
-	buffer.read_str(account, 4096);
-	std::stringstream stream;
-	stream << role_name;
-	robot_info_.role_name = stream.str();
-	stream.str("");
-	stream << account;
-	robot_info_.account = stream.str();
+	buffer.read_str(robot_info_.role_name);
+	buffer.read_str(robot_info_.account);
 	robot_info_.level = buffer.read_uint(8);
 	robot_info_.exp = buffer.read_uint(32);
 	robot_info_.gender = buffer.read_uint(1);
