@@ -21,11 +21,8 @@ LIB=-lnodelib\
 	-lv8_libplatform\
 	-lcurl\
 	-lcrypto\
-	-lmongoclient\
 	-lmysqlcppconn\
 	-ljsoncpp\
-	-lboost_filesystem\
-	-lboost_thread-mt\
 
 BIN=./
 
