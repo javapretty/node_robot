@@ -53,7 +53,7 @@ int Robot::auto_send_msg() {
 		Robot_Struct *robot_struct = STRUCT_MANAGER->get_robot_struct(stream.str());
 		if (robot_struct) {
 			Bit_Buffer buffer;
-			robot_struct->write_bit_buffer(buffer);
+			robot_struct->write_bit_buffer(robot_struct->field_vec(), buffer);
 			ROBOT_MANAGER->send_to_gate(gate_cid_, msg_id, buffer);
 		}
 	}
@@ -105,7 +105,7 @@ int Robot::recv_server_msg(int msg_id, Bit_Buffer &buffer) {
 	stream << msg_id;
 	Robot_Struct *robot_struct = STRUCT_MANAGER->get_robot_struct(stream.str());
 	if (robot_struct) {
-		robot_struct->read_bit_buffer(buffer);
+		robot_struct->read_bit_buffer(robot_struct->field_vec(), buffer);
 	}
 	return 0;
 }
