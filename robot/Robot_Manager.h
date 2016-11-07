@@ -17,9 +17,9 @@
 #include "Robot.h"
 
 class Robot_Manager: public Thread {
-	typedef Object_Pool<Connector, Thread_Mutex> Connector_Pool;
+	typedef Object_Pool<Connector, Mutex_Lock> Connector_Pool;
 	typedef Object_Pool<Robot> Robot_Pool;
-	typedef List<int, Thread_Mutex> Tick_List;
+	typedef List<int, Mutex_Lock> Tick_List;
 	typedef std::unordered_map<int, Robot *> Cid_Robot_Map;
 public:
 	static Robot_Manager *instance(void);
