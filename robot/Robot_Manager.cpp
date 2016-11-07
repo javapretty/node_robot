@@ -84,11 +84,11 @@ int Robot_Manager::process_list(void) {
 
 	while (1) {
 		bool all_empty = true;
-		if (center_connector_ && (buffer = center_connector_->buffer_list().pop_front()) != 0) {
+		if (center_connector_ && (buffer = center_connector_->get_buffer()) != nullptr) {
 			all_empty = false;
 			process_buffer(*buffer);
 		}
-		if (gate_connector_ && (buffer = gate_connector_->buffer_list().pop_front()) != 0) {
+		if (gate_connector_ && (buffer = gate_connector_->get_buffer()) != nullptr) {
 			all_empty = false;
 			process_buffer(*buffer);
 		}
