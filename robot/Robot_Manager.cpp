@@ -84,11 +84,7 @@ int Robot_Manager::process_list(void) {
 
 	while (1) {
 		bool all_empty = true;
-		if (center_connector_ && (buffer = center_connector_->get_buffer()) != nullptr) {
-			all_empty = false;
-			process_buffer(*buffer);
-		}
-		if (gate_connector_ && (buffer = gate_connector_->get_buffer()) != nullptr) {
+		if ((buffer = buffer_list_.pop_front()) != nullptr) {
 			all_empty = false;
 			process_buffer(*buffer);
 		}
@@ -146,11 +142,6 @@ int Robot_Manager::process_buffer(Byte_Buffer &buffer) {
 	return 0;
 }
 
-int Robot_Manager::push_tick(int tick_v) {
-	tick_list_.push_back(tick_v);
-	return 0;
-}
-
 int Robot_Manager::tick(void) {
 	Time_Value now(Time_Value::gettimeofday());
 	server_tick_ = now;
@@ -199,7 +190,6 @@ Robot *Robot_Manager::connect_center(const char *account) {
 		LOG_ERROR("center_cid = %d", center_cid);
 		return nullptr;
 	}
-	center_connector_->set_cid(center_cid);
 
 	Robot *robot = robot_pool_.pop();
 	if (!robot) {
@@ -238,7 +228,6 @@ int Robot_Manager::connect_gate(int center_cid, const char* gate_ip, int gate_po
 		LOG_ERROR("gate_cid = %d", gate_cid);
 		return -1;
 	}
-	gate_connector_->set_cid(gate_cid);
 
 	Cid_Robot_Map::iterator robot_iter = robot_map_.find(center_cid);
 	if (robot_iter == robot_map_.end()) {

@@ -14,7 +14,8 @@ Robot_Timer_Handler::Robot_Timer_Handler(void) { }
 Robot_Timer_Handler::~Robot_Timer_Handler(void) { }
 
 int Robot_Timer_Handler::handle_timeout(const Time_Value &tv) {
-	return ROBOT_MANAGER->push_tick(tv.sec());
+	ROBOT_MANAGER->push_tick(tv.sec());
+	return 0;
 }
 
 Robot_Timer::Robot_Timer(void) { }

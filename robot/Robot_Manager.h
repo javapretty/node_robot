@@ -13,13 +13,14 @@
 #include "Bit_Buffer.h"
 #include "Buffer_List.h"
 #include "Object_Pool.h"
-#include "Endpoint.h"
+#include "Robot_Connector.h"
 #include "Robot.h"
 
 class Robot_Manager: public Thread {
 	typedef Object_Pool<Connector, Mutex_Lock> Connector_Pool;
 	typedef Object_Pool<Robot> Robot_Pool;
-	typedef List<int, Mutex_Lock> Tick_List;
+	typedef Buffer_List<Mutex_Lock> Data_List;
+	typedef List<int, Mutex_Lock> Int_List;
 	typedef std::unordered_map<int, Robot *> Cid_Robot_Map;
 public:
 	static Robot_Manager *instance(void);
@@ -30,7 +31,9 @@ public:
 
 	int process_list();
 	int process_buffer(Byte_Buffer &buffer);
-	int push_tick(int tick_v);
+
+	inline int push_buffer(Byte_Buffer *buffer) { return buffer_list_.push_back(buffer); }
+	inline void push_tick(int tick) { tick_list_.push_back(tick); }
 
 	int tick(void);
 	int login_tick(Time_Value &now);
@@ -76,7 +79,8 @@ private:
 	Time_Value first_login_tick_;
 	Time_Value last_login_tick_;
 
-	Tick_List tick_list_;
+	Data_List buffer_list_;					//消息列表
+	Int_List tick_list_;
 
 	Cid_Robot_Map robot_map_;
 };
