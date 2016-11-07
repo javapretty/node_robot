@@ -34,6 +34,6 @@ int Connector::connect_server(std::string ip, int port) {
 	return cid_;
 }
 
-int Connector::post_buffer(Byte_Buffer* buffer) {
-	return ROBOT_MANAGER->push_buffer(buffer);
+void Connector::post_buffer(Byte_Buffer* buffer) {
+	ROBOT_MANAGER->push_buffer(buffer);
 }

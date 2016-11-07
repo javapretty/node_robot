@@ -32,8 +32,18 @@ public:
 	int process_list();
 	int process_buffer(Byte_Buffer &buffer);
 
-	inline int push_buffer(Byte_Buffer *buffer) { return buffer_list_.push_back(buffer); }
-	inline void push_tick(int tick) { tick_list_.push_back(tick); }
+	inline void push_buffer(Byte_Buffer *buffer) {
+		notify_lock_.lock();
+		buffer_list_.push_back(buffer);
+		notify_lock_.signal();
+		notify_lock_.unlock();
+	}
+	inline void push_tick(int tick) {
+		notify_lock_.lock();
+		tick_list_.push_back(tick);
+		notify_lock_.signal();
+		notify_lock_.unlock();
+	}
 
 	int tick(void);
 	int login_tick(Time_Value &now);

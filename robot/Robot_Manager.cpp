@@ -80,22 +80,26 @@ int Robot_Manager::init(void) {
 }
 
 int Robot_Manager::process_list(void) {
-	Byte_Buffer *buffer = 0;
+	Byte_Buffer *buffer = nullptr;
 
-	while (1) {
-		bool all_empty = true;
-		if ((buffer = buffer_list_.pop_front()) != nullptr) {
-			all_empty = false;
+	while (true) {
+		notify_lock_.lock();
+
+		//put wait in while cause there can be spurious wake up (due to signal/ENITR)
+		while (buffer_list_.empty() && tick_list_.empty()) {
+			notify_lock_.wait();
+		}
+
+		buffer = buffer_list_.pop_front();
+		if (buffer != nullptr) {
 			process_buffer(*buffer);
 		}
 		if (!tick_list_.empty()) {
-			all_empty = false;
 			tick_list_.pop_front();
 			tick();
 		}
-		if (all_empty) {
-			Time_Value::sleep(Time_Value(0, 100));
-		}
+
+		notify_lock_.unlock();
 	}
 
 	return 0;

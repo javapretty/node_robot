@@ -19,7 +19,7 @@ public:
 	virtual int start(void);
 	int connect_server(std::string ip = "", int port = 0);
 
-	virtual int post_buffer(Byte_Buffer* buffer);
+	virtual void post_buffer(Byte_Buffer* buffer);
 	virtual int get_cid(void) { return cid_; }
 
 private:
