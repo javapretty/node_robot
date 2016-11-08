@@ -18,8 +18,6 @@ Robot_Manager::Robot_Manager(void) :
 	robot_count_(0),
 	login_interval_(1),
 	send_msg_interval_(1),
-	robot_lifetime_(1),
-	robot_mode_(0),
 	robot_index_(0),
 	server_tick_(Time_Value::zero),
 	first_login_tick_(Time_Value::zero),
@@ -54,26 +52,40 @@ int Robot_Manager::init(void) {
 	center_port_ = robot_config["center_port"].asInt();
 	robot_count_ = robot_config["robot_count"].asInt();
 	login_interval_ = robot_config["login_interval"].asInt();
-	send_msg_interval_ = robot_config["send_msg_interval_"].asInt();
-	robot_lifetime_ = robot_config["robot_lifetime"].asInt();
-	robot_mode_ = robot_config["robot_mode"].asInt();
+	send_msg_interval_ = robot_config["send_msg_interval"].asInt();
 	robot_index_ = 0;
 
 	//加载robot_struct
 	STRUCT_MANAGER->init_struct("config/client_msg.xml", ROBOT_STRUCT);
 	STRUCT_MANAGER->init_struct("config/public_struct.xml", ROBOT_STRUCT);
 
-	//连接center_server
+	//初始化center_connector
 	Endpoint_Info endpoint_info;
 	endpoint_info.endpoint_type = CONNECTOR;
+	endpoint_info.endpoint_gid = 1;
 	endpoint_info.endpoint_id = 1001;
 	endpoint_info.endpoint_name = "center_connector";
 	endpoint_info.server_ip = center_ip_;
 	endpoint_info.server_port = center_port_;
 	endpoint_info.protocol_type = TCP;
+	endpoint_info.receive_timeout = 0;
 	center_connector_ = connector_pool_.pop();
 	center_connector_->init(endpoint_info);
 	center_connector_->start();
+
+	//初始化gate_connector
+	endpoint_info.reset();
+	endpoint_info.endpoint_type = CONNECTOR;
+	endpoint_info.endpoint_gid = 1;
+	endpoint_info.endpoint_id = 1002;
+	endpoint_info.endpoint_name = "gate_connector";
+	endpoint_info.server_ip = center_ip_;
+	endpoint_info.server_port = center_port_;
+	endpoint_info.protocol_type = TCP;
+	endpoint_info.receive_timeout = 0;
+	gate_connector_ = connector_pool_.pop();
+	gate_connector_->init(endpoint_info);
+	gate_connector_->start();
 
 	ROBOT_TIMER->thr_create();
 	return 0;
@@ -117,7 +129,13 @@ int Robot_Manager::process_buffer(Byte_Buffer &buffer) {
 	buffer.read_uint8(client_msg);
 	buffer.read_uint8(msg_id);
 
-	Robot *robot = get_robot(cid);
+	Robot *robot = nullptr;
+	if(msg_id == RES_SELECT_GATE) {
+		robot = get_center_robot(cid);
+	}
+	else {
+		robot = get_gate_robot(cid);
+	}
 	Bit_Buffer buf;
 	buf.set_ary(buffer.get_read_ptr(), buffer.readable_bytes());
 	switch (msg_id) {
@@ -149,16 +167,8 @@ int Robot_Manager::process_buffer(Byte_Buffer &buffer) {
 int Robot_Manager::tick(void) {
 	Time_Value now(Time_Value::gettimeofday());
 	server_tick_ = now;
-
-	if(!robot_mode_){
-		login_tick(now);
-	}
+	login_tick(now);
 	robot_tick(now);
-
-	//if(now - first_login_tick_ >= Time_Value(run_time_, 0)){
-	//print_report();
-	//exit(0);
-	//}
 
 	return 0;
 }
@@ -173,7 +183,6 @@ int Robot_Manager::login_tick(Time_Value &now) {
 		if (robot_index_ == 0) {
 			first_login_tick_ = now;
 		}
-
 		connect_center();
 	}
 
@@ -181,7 +190,7 @@ int Robot_Manager::login_tick(Time_Value &now) {
 }
 
 int Robot_Manager::robot_tick(Time_Value &now) {
-	for (Cid_Robot_Map::iterator it = robot_map_.begin(); it != robot_map_.end(); ++it) {
+	for (Cid_Robot_Map::iterator it = center_robot_map_.begin(); it != center_robot_map_.end(); ++it) {
 		it->second->tick(now);
 	}
 
@@ -189,6 +198,7 @@ int Robot_Manager::robot_tick(Time_Value &now) {
 }
 
 Robot *Robot_Manager::connect_center(const char *account) {
+	//连接center_server
 	int center_cid = center_connector_->connect_server();
 	if (center_cid < 2) {
 		LOG_ERROR("center_cid = %d", center_cid);
@@ -201,7 +211,7 @@ Robot *Robot_Manager::connect_center(const char *account) {
 	}
 	robot->reset();
 	robot->set_center_cid(center_cid);
-	if(account == nullptr){
+	if(account == nullptr) {
 		std::stringstream account_stream;
 		int rand_num = random() % 1000;
 		account_stream << "robot" << robot_index_++ << "_" << rand_num;
@@ -210,38 +220,30 @@ Robot *Robot_Manager::connect_center(const char *account) {
 	else{
 		robot->robot_info().account = account;
 	}
-	robot_map_.insert(std::make_pair(center_cid, robot));
+	center_robot_map_.insert(std::make_pair(center_cid, robot));
+
 	robot->req_select_gate();
 	return robot;
 }
 
 int Robot_Manager::connect_gate(int center_cid, const char* gate_ip, int gate_port, std::string& token, std::string& account) {
 	//连接gate_server
-	Endpoint_Info endpoint_info;
-	endpoint_info.endpoint_type = CONNECTOR;
-	endpoint_info.endpoint_id = 1002;
-	endpoint_info.endpoint_name = "gate_connector";
-	endpoint_info.server_ip = gate_ip;
-	endpoint_info.server_port = gate_port;
-	endpoint_info.protocol_type = TCP;
-	gate_connector_ = connector_pool_.pop();
-	gate_connector_->init(endpoint_info);
-	gate_connector_->start();
 	int gate_cid = gate_connector_->connect_server(gate_ip, gate_port);
 	if (gate_cid < 2) {
 		LOG_ERROR("gate_cid = %d", gate_cid);
 		return -1;
 	}
 
-	Cid_Robot_Map::iterator robot_iter = robot_map_.find(center_cid);
-	if (robot_iter == robot_map_.end()) {
+	Cid_Robot_Map::iterator robot_iter = center_robot_map_.find(center_cid);
+	if (robot_iter == center_robot_map_.end()) {
 		LOG_ERROR("cannot find center_cid = %d robot", center_cid);
 		return -1;
 	}
 
 	Robot *robot = robot_iter->second;
 	robot->set_gate_cid(gate_cid);
-	robot->robot_info().account = account;
+	gate_robot_map_.insert(std::make_pair(gate_cid, robot));
+
 	robot->req_connect_gate(account, token);
 	return 0;
 }
@@ -274,10 +276,20 @@ int Robot_Manager::send_to_gate(int cid, int msg_id, Bit_Buffer &buffer)  {
 	return gate_connector_->send_buffer(cid, buf);
 }
 
-Robot* Robot_Manager::get_robot(int cid) {
-	Cid_Robot_Map::iterator iter = robot_map_.find(cid);
-	if (iter == robot_map_.end()) {
-		LOG_ERROR("cannot find cid = %d robot", cid);
+Robot* Robot_Manager::get_center_robot(int cid) {
+	Cid_Robot_Map::iterator iter = center_robot_map_.find(cid);
+	if (iter == center_robot_map_.end()) {
+		LOG_ERROR("cannot find center_robot, cid = %d", cid);
+		return nullptr;
+	}
+
+	return iter->second;
+}
+
+Robot* Robot_Manager::get_gate_robot(int cid) {
+	Cid_Robot_Map::iterator iter = gate_robot_map_.find(cid);
+	if (iter == gate_robot_map_.end()) {
+		LOG_ERROR("cannot find gate_robot, cid = %d", cid);
 		return nullptr;
 	}
 
@@ -288,14 +300,14 @@ int Robot_Manager::print_report(void) {
 	uint64_t cost_time = 0;
 	uint64_t msg_count = 0;
 	FILE *fp = fopen("./report.txt", "ab+");
-	for(Cid_Robot_Map::iterator iter = robot_map_.begin();
-			iter != robot_map_.end(); iter++){
-		cost_time += (iter->second)->get_cost_time_total();
+	for(Cid_Robot_Map::iterator iter = center_robot_map_.begin();
+			iter != center_robot_map_.end(); iter++){
+		cost_time += (iter->second)->get_cost_time();
 		msg_count += (iter->second)->get_msg_count();
 	}
 	char temp[512] = {};
 	sprintf(temp, "%ld player login, %lu msg recv, average cost time: %lu\n",
-			robot_map_.size(), msg_count, cost_time / msg_count);
+			center_robot_map_.size(), msg_count, cost_time / msg_count);
 	fputs(temp, fp);
 
 	return 0;

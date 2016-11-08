@@ -13,7 +13,7 @@
 #include "Robot_Manager.h"
 #include "Robot.h"
 
-Robot::Robot(void):login_success_(false), center_cid_(0), gate_cid_(0), cost_time_total_(0), msg_count_(0) { }
+Robot::Robot(void):login_success_(false), center_cid_(0), gate_cid_(0), cost_time_(0), msg_count_(0) { }
 
 Robot::~Robot(void) { }
 
@@ -35,12 +35,10 @@ int Robot::tick(Time_Value &now) {
 			heart_tick_ = now + Time_Value(30, 0);
 		}
 
-		if(ROBOT_MANAGER->robot_mode() == 0){
-			if(now - send_tick_ >= Time_Value(0, ROBOT_MANAGER->send_msg_interval() * 1000)){
-				//发送机器人消息到服务器
-				//send_robot_msg();
-				send_tick_ = now;
-			}
+		if(now - send_tick_ >= Time_Value(0, ROBOT_MANAGER->send_msg_interval() * 1000)){
+			//发送消息到服务器
+			//auto_send_msg();
+			send_tick_ = now;
 		}
 	}
 	return 0;

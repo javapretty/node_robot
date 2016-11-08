@@ -5,7 +5,6 @@
  *      Author: zhangyalei
  */
 
-#include "Robot_Manual.h"
 #include "Robot_Manager.h"
 
 int main(int argc, char *argv[]) {
@@ -14,14 +13,8 @@ int main(int argc, char *argv[]) {
 	ROBOT_MANAGER->init();
 	ROBOT_MANAGER->thr_create();
 
-	if(ROBOT_MANAGER->robot_mode()) {
-		ROBOT_MANUAL->init();
-		ROBOT_MANUAL->run();
-	}
-	else {
-		Epoll_Watcher watcher;
-		watcher.loop();
-	}
+	Epoll_Watcher watcher;
+	watcher.loop();
 
 	return 0;
 }

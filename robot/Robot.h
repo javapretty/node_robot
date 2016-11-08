@@ -39,7 +39,7 @@ public:
 	int res_role_info(Bit_Buffer &buffer);
 	int res_error_code(int msg_id, Bit_Buffer &buffer);
 
-	inline int32_t get_cost_time_total() { return cost_time_total_; }
+	inline int32_t get_cost_time() { return cost_time_; }
 	inline int32_t get_msg_count() { return msg_count_; }
 
 	void set_msg_time(int msg_id);
@@ -56,7 +56,7 @@ private:
 	Robot_Info robot_info_;
 
 	Msg_Cost_Time_Map msg_cost_time_map_;
-	int32_t cost_time_total_;
+	int32_t cost_time_;
 	int32_t msg_count_;
 };
 
@@ -65,7 +65,7 @@ inline void Robot::set_msg_time(int msg_id) {
 }
 
 inline Time_Value Robot::get_msg_time(int msg_id){
-	Msg_Cost_Time_Map::iterator iter = msg_cost_time_map_.find(msg_id - 400000);
+	Msg_Cost_Time_Map::iterator iter = msg_cost_time_map_.find(msg_id);
 	if(iter != msg_cost_time_map_.end()){
 		return iter->second;
 	}

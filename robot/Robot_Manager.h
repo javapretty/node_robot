@@ -8,11 +8,7 @@
 #ifndef ROBOT_MANAGER_H_
 #define ROBOT_MANAGER_H_
 
-#include "Thread.h"
-#include "List.h"
-#include "Bit_Buffer.h"
 #include "Buffer_List.h"
-#include "Object_Pool.h"
 #include "Robot_Connector.h"
 #include "Robot.h"
 
@@ -55,12 +51,11 @@ public:
 	int send_to_center(int cid, int msg_id, Bit_Buffer &buffer);
 	int send_to_gate(int cid, int msg_id, Bit_Buffer &buffer);
 
-	Robot* get_robot(int cid);
+	Robot* get_center_robot(int cid);
+	Robot* get_gate_robot(int cid);
 
 	inline Time_Value &server_tick() { return server_tick_; };
 	inline int send_msg_interval() { return send_msg_interval_; }
-	inline int robot_lifetime() { return robot_lifetime_; }
-	inline int robot_mode() { return robot_mode_; }
 
 private:
 	Robot_Manager(void);
@@ -81,8 +76,6 @@ private:
 	int robot_count_;					//机器人数量
 	int login_interval_;				//机器人登录间隔(毫秒)
 	int send_msg_interval_;		//发送数据间隔,单位是毫秒
-	int robot_lifetime_;    	//机器人运行时间,单位是秒
-	int robot_mode_;						//机器人模式，0是自动化模式，1是交互模式
 	int robot_index_;
 
 	Time_Value server_tick_;
@@ -92,7 +85,8 @@ private:
 	Data_List buffer_list_;					//消息列表
 	Int_List tick_list_;
 
-	Cid_Robot_Map robot_map_;
+	Cid_Robot_Map center_robot_map_;
+	Cid_Robot_Map gate_robot_map_;
 };
 
 #define ROBOT_MANAGER Robot_Manager::instance()
