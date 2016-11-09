@@ -28,7 +28,7 @@ BIN=./
 
 CC=g++
 
-DEPENS=-MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)"
+DEPENDS=-MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)"
 
 DEBUGFLAG=-O0 -g3 -Wall -c -fmessage-length=0 -std=c++11
 
@@ -58,10 +58,10 @@ $(BIN_TARGET):$(OBJECTS)
 $(OBJDIR)%.o:%.cpp
 ifeq ($(MODE), DEBUG)
 	@echo "Building DEBUG MODE target $@"
-	$(CC) $(INCLUDE) $(DEBUGFLAG) $(DEPENS) -o "$(@)" "$(<)"
+	$(CC) $(INCLUDE) $(DEBUGFLAG) $(DEPENDS) -o "$(@)" "$(<)"
 else
 	@echo "Building RELEASE MODE target $@"
-	$(CC) $(INCLUDE) $(RELEASEFLAG) $(DEPENS) -o "$(@)" "$(<)"
+	$(CC) $(INCLUDE) $(RELEASEFLAG) $(DEPENDS) -o "$(@)" "$(<)"
 endif
 	@echo " "
 
