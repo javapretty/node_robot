@@ -1,12 +1,19 @@
+##############################################################################
+#                                                                            #
+#        默认为release模式编译，debug模式请使用参数'MODE=DEBUG'              #
+#                                                                            #
+##############################################################################
 
-###在这里添加源文件目录
+###在这里添加源文件目录###
 SRCDIR=	./\
-		./robot/\
+			./robot/
 
-###这里定义目标文件目录
+###这里定义目标文件目录###
 OBJDIR =./obj/
 
 TARGET_NAME=node_robot
+
+BIN=./
 
 INCLUDE=-I/usr/local/include/nodelib/base\
 		-I/usr/local/include/nodelib/network\
@@ -17,22 +24,21 @@ INCLUDE=-I/usr/local/include/nodelib/base\
 LIBDIR=-L./
 
 LIB=-lnodelib\
-	-lv8\
-	-lv8_libplatform\
-	-lcurl\
-	-lcrypto\
-	-lmysqlcppconn\
 	-ljsoncpp\
-
-BIN=./
 
 CC=g++
 
 DEPENDS=-MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)"
 
-DEBUGFLAG=-O0 -g3 -Wall -c -fmessage-length=0 -std=c++11
+ifeq ($(MODE), DEBUG)
+BUILD_FLAG = -O0 -g3
+else
+BUILD_FLAG = -O3
+endif
 
-RELEASEFLAG=-O3 -Wall -c -fmessage-length=0 -std=c++11
+CONDITION=
+
+COM_FLAG=-Wall -c -fmessage-length=0 -std=c++11
 
 LDFLAG=
 
@@ -42,13 +48,14 @@ SRCS=$(wildcard $(addsuffix *.cpp, $(SRCDIR)))
 
 OBJECTS:=$(addprefix $(OBJDIR), $(subst ./,,$(SRCS:.cpp=.o)))
 
-.PHONY: mkobjdir clean  
+.PHONY:all mkobjdir clean config
 
-all: mkobjdir $(BIN_TARGET)
+all:mkobjdir $(BIN_TARGET)
 
 -include $(OBJECTS:.o=.d)
 
 $(BIN_TARGET):$(OBJECTS)
+	@echo "Linking target $@"
 	$(CC) $(LDFLAG) -o $@ $^ $(LIBDIR) $(LIB)
 	@echo " "
 	@echo "Finished building target: $(TARGET_NAME)"
@@ -58,11 +65,10 @@ $(BIN_TARGET):$(OBJECTS)
 $(OBJDIR)%.o:%.cpp
 ifeq ($(MODE), DEBUG)
 	@echo "Building DEBUG MODE target $@"
-	$(CC) $(INCLUDE) $(DEBUGFLAG) $(DEPENDS) -o "$(@)" "$(<)"
 else
 	@echo "Building RELEASE MODE target $@"
-	$(CC) $(INCLUDE) $(RELEASEFLAG) $(DEPENDS) -o "$(@)" "$(<)"
 endif
+	$(CC) $(INCLUDE) $(BUILD_FLAG) $(COM_FLAG) $(DEPENDS) $(CONDITION) -o "$(@)" "$(<)"
 	@echo " "
 
 mkobjdir:
