@@ -9,7 +9,7 @@ SRCDIR=	./\
 			./robot/
 
 ###这里定义目标文件目录###
-OBJDIR =./obj/
+OBJDIR =./.obj/
 
 TARGET_NAME=node_robot
 
