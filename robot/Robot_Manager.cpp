@@ -48,6 +48,8 @@ void Robot_Manager::run_handler(void) {
 int Robot_Manager::init(void) {
 	ROBOT_CONFIG->load_robot_config();
 	const Json::Value &robot_config = ROBOT_CONFIG->robot_config();
+	Log::instance()->set_log_switcher(robot_config["log_switcher"].asInt());
+	Log::instance()->set_log_level(robot_config["log_level"].asInt());
 	center_ip_ = robot_config["center_ip"].asString();
 	center_port_ = robot_config["center_port"].asInt();
 	robot_count_ = robot_config["robot_count"].asInt();
@@ -213,7 +215,7 @@ Robot *Robot_Manager::connect_center(const char *account) {
 	robot->set_center_cid(center_cid);
 	if(account == nullptr) {
 		std::stringstream account_stream;
-		int rand_num = random() % 1000;
+		int rand_num = random() % 1000000;
 		account_stream << "robot" << robot_index_++ << "_" << rand_num;
 		robot->robot_info().account = account_stream.str();
 	}
