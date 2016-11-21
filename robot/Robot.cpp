@@ -9,7 +9,6 @@
 #include "Base_Function.h"
 #include "Robot_Struct.h"
 #include "Struct_Manager.h"
-#include "Robot_Config.h"
 #include "Robot_Manager.h"
 #include "Robot.h"
 

@@ -46,7 +46,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="robot\Robot.cpp" />
-    <ClCompile Include="robot\Robot_Config.cpp" />
     <ClCompile Include="robot\Robot_Connector.cpp" />
     <ClCompile Include="robot\Robot_Manager.cpp" />
     <ClCompile Include="robot\Robot_Timer.cpp" />
@@ -54,7 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot\Robot.h" />
-    <ClInclude Include="robot\Robot_Config.h" />
     <ClInclude Include="robot\Robot_Connector.h" />
     <ClInclude Include="robot\Robot_Define.h" />
     <ClInclude Include="robot\Robot_Manager.h" />

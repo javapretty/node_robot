@@ -24,7 +24,6 @@ INCLUDE=-I/usr/local/include/nodelib/base\
 LIBDIR=-L./
 
 LIB=-lnodelib\
-	-ljsoncpp\
 
 CC=g++
 

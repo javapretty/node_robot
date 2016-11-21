@@ -7,7 +7,6 @@
 
 #include <sstream>
 #include "Struct_Manager.h"
-#include "Robot_Config.h"
 #include "Robot_Timer.h"
 #include "Robot_Manager.h"
 
@@ -46,15 +45,35 @@ void Robot_Manager::run_handler(void) {
 }
 
 int Robot_Manager::init(void) {
-	ROBOT_CONFIG->load_robot_config();
-	const Json::Value &robot_config = ROBOT_CONFIG->robot_config();
-	Log::instance()->set_log_switcher(robot_config["log_switcher"].asInt());
-	Log::instance()->set_log_level(robot_config["log_level"].asInt());
-	center_ip_ = robot_config["center_ip"].asString();
-	center_port_ = robot_config["center_port"].asInt();
-	robot_count_ = robot_config["robot_count"].asInt();
-	login_interval_ = robot_config["login_interval"].asInt();
-	send_msg_interval_ = robot_config["send_msg_interval"].asInt();
+	Xml xml;
+	bool ret = xml.load_xml("./config/robot_conf.xml");
+	if(ret < 0) {
+		LOG_FATAL("load config:robot_conf.xml abort");
+		return -1;
+	}
+
+	TiXmlNode* log_node = xml.get_root_child_node("log");
+	if(log_node) {
+		bool log_file = xml.get_attr_int(log_node, "file");
+		int log_level = xml.get_attr_int(log_node, "level");
+		std::string folder_name = "robot";
+		Log::instance()->set_log_file(log_file);
+		Log::instance()->set_log_level(log_level);
+		Log::instance()->set_folder_name(folder_name);
+	}
+
+	TiXmlNode* center_node = xml.get_root_child_node("center");
+	if(center_node) {
+		center_ip_ = xml.get_attr_str(center_node, "ip");
+		center_port_ = xml.get_attr_int(center_node, "port");
+	}
+
+	TiXmlNode* robot_node = xml.get_root_child_node("robot");
+	if(robot_node) {
+		robot_count_ = xml.get_attr_int(robot_node, "count");
+		login_interval_ = xml.get_attr_int(robot_node, "login_interval");
+		send_msg_interval_ = xml.get_attr_int(robot_node, "send_msg_interval_");
+	}
 	robot_index_ = 0;
 
 	//加载robot_struct
