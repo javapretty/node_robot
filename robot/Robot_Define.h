@@ -15,21 +15,23 @@
 typedef std::unordered_map<int32_t, Time_Value> Msg_Cost_Time_Map;
 
 enum Message {
-	REQ_HEARTBEAT 			=	1,	//发送心跳到gate_server
-	RES_HEARTBEAT 			= 1,
+	REQ_HEARTBEAT 		= 1,//发送心跳到gate_server
+	RES_HEARTBEAT 		= 1,
 
-	REQ_SELECT_GATE 		= 2,	//选择gate_server
+	REQ_SELECT_GATE 	= 2,//选择gate_server
 	RES_SELECT_GATE		= 2,
 
-	REQ_CONNECT_GATE		=	3,	//登录gate_server
-	RES_CONNECT_GATE		= 3,
+	REQ_CONNECT_GATE	= 3,//登录gate_server
+	RES_CONNECT_GATE	= 3,
 
-	REQ_FETCH_ROLE			=	4,	//获取角色
-	RES_FETCH_ROLE			=	4,
+	REQ_FETCH_ROLE		= 4,//获取角色
+	RES_FETCH_ROLE		= 4,
 
-	REQ_CREATE_ROLE 		= 5,	//创建角色
+	REQ_CREATE_ROLE 	= 5,//创建角色
+	RES_ERROR_CODE		= 5,//返回错误号
 
-	RES_ERROR_CODE			= 5,	//返回错误号
+	REQ_TEST_SERVER		= 255,//测试服务器
+	RES_TEST_SERVER		= 255,//测试服务器
 };
 
 struct Args_Info {

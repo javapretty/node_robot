@@ -31,6 +31,7 @@ public:
 	int req_connect_gate(std::string& account, std::string& token);
 	int req_fetch_role(void);
 	int req_create_role(void);
+	int req_test_server(void);
 
 	//server-->client
 	int recv_server_msg(int msg_id, Bit_Buffer &buffer);
@@ -52,7 +53,7 @@ private:
 
 	Time_Value login_tick_;
 	Time_Value heart_tick_;
-	Time_Value send_tick_;
+	Time_Value send_msg_tick_;
 	Robot_Info robot_info_;
 
 	Msg_Cost_Time_Map msg_cost_time_map_;

@@ -72,17 +72,17 @@ private:
 	Connector *gate_connector_;
 
 	std::string center_ip_;		//center服务器ip
-	int center_port_;					//center服务器端口
-	int robot_count_;					//机器人数量
-	int login_interval_;				//机器人登录间隔(毫秒)
-	int send_msg_interval_;		//发送数据间隔,单位是毫秒
+	int center_port_;			//center服务器端口
+	int robot_count_;			//机器人数量
+	int login_interval_;		//登录间隔(毫秒)
+	int send_msg_interval_;		//发送消息间隔(毫秒)
 	int robot_index_;
 
 	Time_Value server_tick_;
 	Time_Value first_login_tick_;
 	Time_Value last_login_tick_;
 
-	Data_List buffer_list_;					//消息列表
+	Data_List buffer_list_;
 	Int_List tick_list_;
 
 	Cid_Robot_Map center_robot_map_;

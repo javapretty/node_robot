@@ -70,7 +70,7 @@ int Robot_Manager::init(void) {
 	if(robot_node) {
 		robot_count_ = xml.get_attr_int(robot_node, "count");
 		login_interval_ = xml.get_attr_int(robot_node, "login_interval");
-		send_msg_interval_ = xml.get_attr_int(robot_node, "send_msg_interval_");
+		send_msg_interval_ = xml.get_attr_int(robot_node, "send_msg_interval");
 	}
 	robot_index_ = 0;
 

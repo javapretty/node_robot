@@ -22,7 +22,7 @@ void Robot::reset(void) {
 	gate_cid_ = 0;
 	login_tick_ = Time_Value::gettimeofday();
 	heart_tick_ = Time_Value::gettimeofday();
-	send_tick_ = Time_Value::gettimeofday();
+	send_msg_tick_ = Time_Value::gettimeofday();
 	robot_info_.reset();
 };
 
@@ -30,14 +30,14 @@ int Robot::tick(Time_Value &now) {
 	if (login_success_) {
 		// 心跳
 		if (heart_tick_ < now) {
-			req_heartbeat(now);
 			heart_tick_ = now + Time_Value(30, 0);
+			req_heartbeat(now);
 		}
 
-		if(now - send_tick_ >= Time_Value(0, ROBOT_MANAGER->send_msg_interval() * 1000)){
-			//发送消息到服务器
-			//auto_send_msg();
-			send_tick_ = now;
+		//发生测试消息
+		if(send_msg_tick_ < now){
+			send_msg_tick_ = now + Time_Value(ROBOT_MANAGER->send_msg_interval(), 0);
+			req_test_server();
 		}
 	}
 	return 0;
@@ -93,6 +93,24 @@ int Robot::req_create_role(void) {
 	buffer.write_uint(rand() % 2, 1);
 	buffer.write_uint(rand() % 3, 2);
 	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_CREATE_ROLE, buffer);
+	return 0;
+}
+
+int Robot::req_test_server(void) {
+	Bit_Buffer buffer;
+	buffer.write_bool(true);
+	buffer.write_int(1, 16);
+	int type = rand() % 2 + 1;
+	buffer.write_uint(type, 8);
+	switch(type) {
+	case 1:
+		buffer.write_int64(10001);
+		break;
+	case 2:
+		buffer.write_str("test_server");
+		break;
+	}
+	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_TEST_SERVER, buffer);
 	return 0;
 }
 
