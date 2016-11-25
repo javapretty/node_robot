@@ -1,0 +1,4 @@
+<root>
+  <exec name="./node_robot" count="10"></exec>
+  <log file="0" level="0"></log>
+</root>
