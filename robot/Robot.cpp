@@ -34,10 +34,10 @@ int Robot::tick(Time_Value &now) {
 			req_heartbeat(now);
 		}
 
-		//发生测试消息
+		//发送消息间隔
 		if(send_msg_tick_ < now){
 			send_msg_tick_ = now + Time_Value(ROBOT_MANAGER->send_msg_interval(), 0);
-			req_test_server();
+			//req_test_server();
 		}
 	}
 	return 0;
@@ -127,16 +127,16 @@ int Robot::recv_server_msg(int msg_id, Bit_Buffer &buffer) {
 
 int Robot::res_select_gate(Bit_Buffer &buffer) {
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
-	std::string gate_ip = "";
-	uint16_t gate_port = 0;
+	std::string server_ip = "";
+	uint16_t server_port = 0;
 	std::string token = "";
 
-	buffer.read_str(gate_ip);
-	gate_port = buffer.read_uint(16);
+	buffer.read_str(server_ip);
+	server_port = buffer.read_uint(16);
 	buffer.read_str(token);
-	LOG_INFO("select gate success, gate_ip:%s, gate_port:%d, token:%s, account:%s, login_msec:%d",
-			gate_ip.c_str(), gate_port, token.c_str(), robot_info_.account.c_str(), login_msec);
-	ROBOT_MANAGER->connect_gate(center_cid_, gate_ip.c_str(), gate_port, token, robot_info_.account) ;
+	LOG_INFO("select server success, server_ip:%s, server_port:%d, token:%s, account:%s, login_msec:%d",
+			server_ip.c_str(), server_port, token.c_str(), robot_info_.account.c_str(), login_msec);
+	ROBOT_MANAGER->connect_gate(center_cid_, server_ip.c_str(), server_port, token, robot_info_.account) ;
 
 	return 0;
 }
@@ -144,7 +144,7 @@ int Robot::res_select_gate(Bit_Buffer &buffer) {
 int Robot::res_connect_gate(Bit_Buffer &buffer) {
 	std::string account;
 	int login_msec = Time_Value::gettimeofday().msec() - login_tick_.msec();
-	LOG_INFO("connect gate success, gate_cid = %d, account = %s, login_msec = %d", gate_cid_, robot_info_.account.c_str(), login_msec);
+	LOG_INFO("connect server success, cid = %d, account = %s, login_msec = %d", gate_cid_, robot_info_.account.c_str(), login_msec);
 
 	req_fetch_role();
 	return 0;
@@ -162,7 +162,7 @@ int Robot::res_role_info(Bit_Buffer &buffer) {
 	Time_Value now = Time_Value::gettimeofday();
 	int login_msec = now.msec() - login_tick_.msec();
 	Date_Time date(now);
-	LOG_INFO("%ld:%ld:%ld login game success account:%s gate_cid = %d login_sec = %d", date.hour(), date.minute(), date.second()
+	LOG_INFO("%ld:%ld:%ld login server success account:%s cid = %d login_sec = %d", date.hour(), date.minute(), date.second()
 			, robot_info_.account.c_str(), gate_cid_, login_msec);
 	login_success_ = true;
 
