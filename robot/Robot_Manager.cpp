@@ -277,7 +277,10 @@ int Robot_Manager::send_to_center(int cid, int msg_id, Bit_Buffer &buffer)  {
 	buf.write_uint16(0);
 	buf.write_uint8(msg_id);
 	buf.copy(buffer.data(), buffer.get_byte_size());
-	buf.write_len(TCP, RPC_PKG);
+	Msg_Head msg_head;
+	msg_head.protocol = TCP;
+	msg_head.pkg_type = RPC_PKG;
+	buf.write_len(msg_head);
 	return center_connector_->send_buffer(cid, buf);
 }
 
@@ -291,7 +294,10 @@ int Robot_Manager::send_to_gate(int cid, int msg_id, Bit_Buffer &buffer)  {
 	buf.write_uint16(0);
 	buf.write_uint8(msg_id);
 	buf.copy(buffer.data(), buffer.get_byte_size());
-	buf.write_len(TCP, RPC_PKG);
+	Msg_Head msg_head;
+	msg_head.protocol = TCP;
+	msg_head.pkg_type = RPC_PKG;
+	buf.write_len(msg_head);
 	return gate_connector_->send_buffer(cid, buf);
 }
 
