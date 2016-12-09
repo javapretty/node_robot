@@ -29,9 +29,6 @@ enum Message {
 
 	REQ_CREATE_ROLE 	= 5,//创建角色
 	RES_ERROR_CODE		= 5,//返回错误号
-
-	REQ_TEST_SERVER		= 255,//测试服务器
-	RES_TEST_SERVER		= 255,//测试服务器
 };
 
 struct Args_Info {

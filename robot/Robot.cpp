@@ -37,7 +37,8 @@ int Robot::tick(Time_Value &now) {
 		//发送消息间隔
 		if(send_msg_tick_ < now){
 			send_msg_tick_ = now + Time_Value(ROBOT_MANAGER->send_msg_interval(), 0);
-			//req_test_server();
+			//req_test_arg();
+			//req_test_switch();
 		}
 	}
 	return 0;
@@ -96,10 +97,19 @@ int Robot::req_create_role(void) {
 	return 0;
 }
 
-int Robot::req_test_server(void) {
+int Robot::req_test_arg(void) {
+	Bit_Buffer buffer;
+	buffer.write_int(1, 4);
+	buffer.write_uint(255, 8);
+	buffer.write_uint(15, 4);
+	ROBOT_MANAGER->send_to_gate(gate_cid_, 254, buffer);
+	return 0;
+}
+
+int Robot::req_test_switch(void) {
 	Bit_Buffer buffer;
 	buffer.write_bool(true);
-	buffer.write_int(1, 16);
+	buffer.write_int(1, 32);
 	int type = rand() % 2 + 1;
 	buffer.write_uint(type, 8);
 	switch(type) {
@@ -110,7 +120,7 @@ int Robot::req_test_server(void) {
 		buffer.write_str("test_server");
 		break;
 	}
-	ROBOT_MANAGER->send_to_gate(gate_cid_, REQ_TEST_SERVER, buffer);
+	ROBOT_MANAGER->send_to_gate(gate_cid_, 255, buffer);
 	return 0;
 }
 

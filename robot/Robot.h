@@ -31,7 +31,8 @@ public:
 	int req_connect_gate(std::string& account, std::string& token);
 	int req_fetch_role(void);
 	int req_create_role(void);
-	int req_test_server(void);
+	int req_test_arg(void);
+	int req_test_switch(void);
 
 	//server-->client
 	int recv_server_msg(int msg_id, Bit_Buffer &buffer);
