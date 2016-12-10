@@ -6,6 +6,7 @@
 */
 
 #include <sstream>
+#include "Base_Function.h"
 #include "Struct_Manager.h"
 #include "Robot_Timer.h"
 #include "Robot_Manager.h"
@@ -52,13 +53,17 @@ int Robot_Manager::init(void) {
 		return -1;
 	}
 
+	//设置进程资源限制
+	set_rlimit();
+
 	TiXmlNode* log_node = xml.get_root_node("log");
 	if(log_node) {
 		std::string folder_name = "robot";
-		Log::instance()->set_log_file(xml.get_attr_int(log_node, "file"));
-		Log::instance()->set_log_level(xml.get_attr_int(log_node, "level"));
-		Log::instance()->set_folder_name(folder_name);
+		LOG_INSTACNE->set_log_file(xml.get_attr_int(log_node, "file"));
+		LOG_INSTACNE->set_log_level(xml.get_attr_int(log_node, "level"));
+		LOG_INSTACNE->set_folder_name(folder_name);
 	}
+	LOG_INSTACNE->thr_create();
 
 	TiXmlNode* center_node = xml.get_root_node("center");
 	if(center_node) {
