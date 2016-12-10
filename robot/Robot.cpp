@@ -36,9 +36,9 @@ int Robot::tick(Time_Value &now) {
 
 		//发送消息间隔
 		if(send_msg_tick_ < now){
-			send_msg_tick_ = now + Time_Value(ROBOT_MANAGER->send_msg_interval(), 0);
+			send_msg_tick_ = now + Time_Value(0, ROBOT_MANAGER->send_msg_interval() * 1000);
 			//req_test_arg();
-			//req_test_switch();
+			req_test_switch();
 		}
 	}
 	return 0;
@@ -176,7 +176,7 @@ int Robot::res_role_info(Bit_Buffer &buffer) {
 			, robot_info_.account.c_str(), gate_cid_, login_msec);
 	login_success_ = true;
 
-	auto_send_msg();
+	//auto_send_msg();
 	return 0;
 }
 
