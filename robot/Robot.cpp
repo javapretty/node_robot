@@ -21,7 +21,7 @@ void Robot::reset(void) {
 	center_cid_ = 0;
 	gate_cid_ = 0;
 	login_tick_ = Time_Value::gettimeofday();
-	heart_tick_ = Time_Value::gettimeofday();
+	heartbeat_tick_ = Time_Value::gettimeofday();
 	send_msg_tick_ = Time_Value::gettimeofday();
 	robot_info_.reset();
 };
@@ -29,8 +29,8 @@ void Robot::reset(void) {
 int Robot::tick(Time_Value &now) {
 	if (login_success_) {
 		// 心跳
-		if (heart_tick_ < now) {
-			heart_tick_ = now + Time_Value(30, 0);
+		if (heartbeat_tick_ < now) {
+			heartbeat_tick_ = now + Time_Value(15, 0);
 			req_heartbeat(now);
 		}
 
@@ -38,7 +38,7 @@ int Robot::tick(Time_Value &now) {
 		if(send_msg_tick_ < now){
 			send_msg_tick_ = now + Time_Value(0, ROBOT_MANAGER->send_msg_interval() * 1000);
 			//req_test_arg();
-			req_test_switch();
+			//req_test_switch();
 		}
 	}
 	return 0;

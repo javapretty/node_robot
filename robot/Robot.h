@@ -53,7 +53,7 @@ private:
 	int gate_cid_;
 
 	Time_Value login_tick_;
-	Time_Value heart_tick_;
+	Time_Value heartbeat_tick_;
 	Time_Value send_msg_tick_;
 	Robot_Info robot_info_;
 
