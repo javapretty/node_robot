@@ -176,7 +176,7 @@ int Robot::res_role_info(Bit_Buffer &buffer) {
 			, robot_info_.account.c_str(), gate_cid_, login_msec);
 	login_success_ = true;
 
-	//auto_send_msg();
+	auto_send_msg();
 	return 0;
 }
 
