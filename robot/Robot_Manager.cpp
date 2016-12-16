@@ -92,7 +92,7 @@ int Robot_Manager::init(void) {
 	endpoint_info.server_ip = center_ip_;
 	endpoint_info.server_port = center_port_;
 	endpoint_info.protocol_type = TCP;
-	endpoint_info.receive_timeout = 0;
+	endpoint_info.heartbeat_timeout = 0;
 	center_connector_ = connector_pool_.pop();
 	center_connector_->init(endpoint_info);
 	center_connector_->start();
@@ -106,7 +106,7 @@ int Robot_Manager::init(void) {
 	endpoint_info.server_ip = center_ip_;
 	endpoint_info.server_port = center_port_;
 	endpoint_info.protocol_type = TCP;
-	endpoint_info.receive_timeout = 0;
+	endpoint_info.heartbeat_timeout = 0;
 	gate_connector_ = connector_pool_.pop();
 	gate_connector_->init(endpoint_info);
 	gate_connector_->start();

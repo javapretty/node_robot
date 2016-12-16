@@ -16,7 +16,7 @@ int Connector::init(Endpoint_Info &endpoint_info) {
 	Endpoint::init(endpoint_info);
 
 	connect().init(this);
-	network().init(this, endpoint_info.receive_timeout);
+	network().init(this, endpoint_info.heartbeat_timeout);
 	return 0;
 }
 
