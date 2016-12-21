@@ -18,9 +18,9 @@ public:
 	virtual int init(Endpoint_Info &endpoint_info);
 	virtual int start(void);
 	int connect_server(std::string ip = "", int port = 0);
+	int get_cid(void) { return cid_; }
 
 	virtual void post_buffer(Byte_Buffer* buffer);
-	virtual int get_cid(void) { return cid_; }
 
 private:
 	int cid_;
