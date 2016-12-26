@@ -30,7 +30,7 @@ int Robot::tick(Time_Value &now) {
 	if (login_success_) {
 		// 心跳
 		if (heartbeat_tick_ < now) {
-			heartbeat_tick_ = now + Time_Value(15, 0);
+			heartbeat_tick_ = now + Time_Value(5, 0);
 			req_heartbeat(now);
 		}
 
