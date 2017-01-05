@@ -54,7 +54,6 @@
   <ItemGroup>
     <ClInclude Include="robot\Robot.h" />
     <ClInclude Include="robot\Robot_Connector.h" />
-    <ClInclude Include="robot\Robot_Define.h" />
     <ClInclude Include="robot\Robot_Manager.h" />
     <ClInclude Include="robot\Robot_Timer.h" />
   </ItemGroup>

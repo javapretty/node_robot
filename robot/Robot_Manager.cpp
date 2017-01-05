@@ -171,12 +171,12 @@ int Robot_Manager::process_buffer(Byte_Buffer &buffer) {
 		robot->res_connect_gate(buf);
 		break;
 	}
-	case RES_FETCH_ROLE: {
-		robot->res_role_info(buf);
+	case RES_ROLE_LIST: {
+		robot->res_role_list(buf);
 		break;
 	}
-	case RES_ERROR_CODE:{
-		robot->res_error_code(msg_id, buf);
+	case RES_ENTER_GAME:{
+		robot->res_enter_game(buf);
 		break;
 	}
 	default: {
@@ -239,10 +239,11 @@ Robot *Robot_Manager::connect_center(const char *account) {
 		std::stringstream account_stream;
 		int rand_num = random() % 1000000;
 		account_stream << "robot" << robot_index_++ << "_" << rand_num;
-		robot->robot_info().account = account_stream.str();
+		robot->set_account(account_stream.str());
 	}
-	else{
-		robot->robot_info().account = account;
+	else {
+		std::string account_str(account);
+		robot->set_account(account_str);
 	}
 	center_robot_map_.insert(std::make_pair(center_cid, robot));
 
