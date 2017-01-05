@@ -26,7 +26,7 @@ enum Message {
 	REQ_CONNECT_GATE	= 3,//登录gate_server
 	RES_CONNECT_GATE	= 3,
 
-	REQ_ROLE_LIST		= 4,//获取列表
+	REQ_ROLE_LIST		= 4,//获取角色列表
 	RES_ROLE_LIST		= 4,
 
 	REQ_ENTER_GAME 		= 5,//进入游戏
